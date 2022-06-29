@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 --																																						--
 --																																						--
---															CIZÍ KLÍÈE V SQL SERVERU																	--
+--															FOREIGN KEYS IN SQL SERVER																	--
 --																																						--
 --																																						--
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -11,8 +11,7 @@
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 --			1.
---			VYPÍŠE CIZÍ KLÍÈE JINÝCH TABULEK, KTERÉ SE ODKAZUJÍ NA TABULKU
---			JIÝMI SLOVY, OBJEKTY KTERÉ V TABULKE DÌLAJÍ "ZAMÈENÉ" HODNOTY
+--			PRINT FOREIGN KEYS FROM ALL TABLES WHICH BLOCK VALUES IN TARGET TABLE
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	SELECT
@@ -21,14 +20,14 @@
 		COL_NAME(parent_object_id, parent_column_id) as 'Referencing Column Name',
 		OBJECT_NAME(constraint_object_id) 'Constraint Name'
 	FROM sys.foreign_key_columns
-	WHERE OBJECT_NAME(referenced_object_id) = 'TabDokladyZbozi'
+	WHERE OBJECT_NAME(referenced_object_id) = 'TabDokladyZbozi'		-- need to fill table
 
 
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 --			2.
---			STEJNÉ KLÍÈE JAKO V BODU 1. + SKRIPT NA CREATE A DROP KLÍÈE
+--			SAME KEYS AS IN POINT 1 + SCRIPT ON CREATE AND DROP KEYS
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 	SELECT   
@@ -52,25 +51,25 @@
 	FROM sys.foreign_keys AS f  
 	INNER JOIN sys.foreign_key_columns AS fc   
 		ON f.object_id = fc.constraint_object_id   
-	WHERE f.referenced_object_id = OBJECT_ID('dbo.TabDokladyZbozi');
+	WHERE f.referenced_object_id = OBJECT_ID('dbo.TabDokladyZbozi');	-- need to fill table
 
-
+	GO
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 --			3.
---			STEJNÉ KLÍÈE JAKO V BODU 1., TENTOKRÁT POMOCÍ SYSTÉMOVÉ PROCEDURY
+--			SAME KEYS AS IN POINT 1, NOW WITH HELP OF SYSTEM PROCEDURE
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 	
-	sp_fkeys TabDokladyZbozi
+	sp_fkeys TabDokladyZbozi	-- need to fill table
 
 
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 --			4.
---			CIZÍ KLÍÈE, KTERÉ SE Z TABULKY NAOPAK ODKAZUJÍ NA JINÉ, LZE JE ZOBRAZIT I V SSMS
---			DÌLAJÍ TEDY "ZÁMKY" NA HODNOTÁCH V JINÝCH TABULKÁCH
+--			FOREIGN KEYS, WHICH LINKS ON OTHER TABLES, CAN SEE ALSO IN SSMS
+--			IT DOES LOCKS ON VALUES IN OTHER TABLES
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	SELECT 
@@ -78,15 +77,15 @@
 		name AS [Foreign Key],
 		OBJECT_NAME(referenced_object_id) AS [PK Table]
 	FROM sys.foreign_keys
-	WHERE parent_object_id = OBJECT_ID('TabDokladyZbozi');
+	WHERE parent_object_id = OBJECT_ID('TabDokladyZbozi');		-- need to fill table
 
 
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 --			5.
---			VYTVOØENÍ PØÍKAZÙ NA DROP A CREATE CIZÍCH KLÍÈÙ ODKAZUJÍCÍCH NA KONKRÉTNÍ TABULKU -> POTØEBA VYPLNIT NÁZEV TABULKY
---			VŠECHNY HODNOTY ULOŽENY V TABULCE FK_DropConstraints V DATABÁZI MASTER
+--			CREATE COMMANDS ON DROP AND CREATE FOREIGN KEYS LINKS ON PARTICULAR TABLE
+--			ALL VALUES ARE SAVED IN TABLE FK_DropConstraints IN DATABASE master
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	DROP TABLE IF EXISTS master.[dbo].[FK_DropConstraints];
@@ -115,14 +114,14 @@
 	FROM sys.foreign_keys AS f  
 	INNER JOIN sys.foreign_key_columns AS fc   
 		ON f.object_id = fc.constraint_object_id   
-	WHERE f.referenced_object_id = OBJECT_ID('dbo.TABULKA');	-- <- POTØEBA VYPLNIT TABULKU
+	WHERE f.referenced_object_id = OBJECT_ID('dbo.TABULKA');	-- need to fill table
 
 
 
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 --			6.
---			SMAZÁNÍ CIZÍCH KLÍÈÙ ODKAZUJÍCÍCH NA KONKRÉTNÍ TABULKU ULOŽENÝCH Z PØÍKAZU 5
+--			DELETE FOREIGN KEYS ON PARTICULAR TABLE SAVED FROM POINT 5
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	DECLARE @cmd VARCHAR(1000)
@@ -137,7 +136,7 @@
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
 		  exec (@cmd)
-		  print @cmd + 'PROVEDENO' + char(13) + char(10) + char(13) + char(10)
+		  print @cmd + 'DONE' + char(13) + char(10) + char(13) + char(10)
 
 		  FETCH NEXT FROM db_cursor INTO @cmd
 	END 
@@ -150,7 +149,7 @@
 
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 --			7.
---			VYTVOØENÍ CIZÍCH KLÍÈÙ ODKAZUJÍCÍCH NA KONKRÉTNÍ TABULKU ULOŽENÝCH Z PØÍKAZU 5
+--			CREATE FOREIGN KEYS LINKS ON PARTICULAR TABLE SAVED FROM POINT 5
 ----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 	DECLARE @cmd VARCHAR(1000)
@@ -165,7 +164,7 @@
 	WHILE @@FETCH_STATUS = 0  
 	BEGIN
 		  exec (@cmd)
-		  print @cmd + 'PROVEDENO' + char(13) + char(10) + char(13) + char(10)
+		  print @cmd + 'DONE' + char(13) + char(10) + char(13) + char(10)
 
 		  FETCH NEXT FROM db_cursor INTO @cmd
 	END 
